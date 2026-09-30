@@ -1,0 +1,128 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   El estilo de la página: oscuro, monocromo y un solo color (el verde de lo
+   cumplido). Toma ideas de Amicro "Mono Charts", SmoothUI y Bencho.
+   Las tipografías (Outfit y JetBrains Mono) van en ./fuentes: la página anda sin internet.
+   ═══════════════════════════════════════════════════════════════════════ */
+@font-face{font-family:"Outfit";src:url(fuentes/outfit-300-800.woff2) format("woff2");font-weight:300 800;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url(fuentes/jetbrains-mono-400-600.woff2) format("woff2");font-weight:400 600;font-display:swap}
+
+:root{
+  color-scheme:dark;
+  /* superficies: fondo · tarjeta · tarjeta 2 · tarjeta 3 · el pozo (panel hundido adentro de la tarjeta) */
+  --bg:#0e0e10; --c1:#161618; --c2:#1d1d20; --c3:#27272b; --pozo:#111113;
+  --line:#232327; --line2:#303036; --line3:rgba(255,255,255,.18);
+  /* texto, con el contraste medido sobre --bg: tx 17:1 · tx2 10:1 · mu 5,9:1 · gris 4,2:1 (solo títulos) */
+  --tx:#f4f4f5; --tx2:#b8b8c0; --mu:#8b8b94; --gris:#74747e; --mu2:#5c5c65; /* ⛔ mu2 no es texto: 3:1 */
+  --blanco:#f4f4f5; --negro:#0e0e10;
+  /* UN solo color: el verde = lo cumplido / lo que te llevás. Escalones para mapas de calor. */
+  --ok:#34d399; --ok-2:#22a877; --ok-3:#176c4e; --ok-4:#10412f; --ok-w:rgba(52,211,153,.10);
+  --bad:#f07565; --bad-w:rgba(240,117,101,.10);   /* rojo: SOLO avisos */
+  --r-t:24px; --r-p:16px; --r-pill:999px;
+  --f:"Outfit",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --m:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  /* movimiento (transitions.dev): abrir/deslizar con --ease, lo que aparece con --pop */
+  --ease:cubic-bezier(.22,1,.36,1); --pop:cubic-bezier(.34,1.36,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0; background:var(--bg); color:var(--tx); font:16px/1.55 var(--f); -webkit-font-smoothing:antialiased}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid var(--tx); outline-offset:2px; border-radius:10px}
+::selection{background:var(--tx); color:var(--negro)}
+.mono{font-family:var(--m); font-variant-numeric:tabular-nums}
+.gris{color:var(--gris)}
+
+/* ─── títulos: dos tonos (SmoothUI) y la palabra clave en PÍLDORA BLANCA ─── */
+h1,h2,h3,h4{margin:0; text-wrap:balance}
+.titulo{font:700 clamp(34px,5vw,56px)/1.03 var(--f); letter-spacing:-.035em}
+.titulo .gris{display:block}
+.clave{background:var(--blanco); color:var(--negro); border-radius:.26em; padding:0 .16em;
+  box-decoration-break:clone; -webkit-box-decoration-break:clone; white-space:nowrap}
+@media(max-width:330px){.clave{white-space:normal}}   /* si no, desborda en un celular chico */
+.eyebrow{font:500 11.5px/1 var(--m); color:var(--mu); letter-spacing:.04em}
+.rotulo{font:500 12.5px/1 var(--m); letter-spacing:.14em; text-transform:uppercase; color:var(--mu);
+  display:flex; align-items:center; gap:12px}
+.rotulo b{color:var(--tx); font-weight:500; border:1px solid var(--line2); border-radius:var(--r-pill); padding:4px 10px}
+.rotulo::after{content:""; flex:1; height:1px; background:var(--line)}
+
+/* ─── la tarjeta con doble marco: tarjeta + pozo ─── */
+.tj{background:var(--c1); border:1px solid var(--line); border-radius:var(--r-t); padding:18px; position:relative; min-width:0}
+.tj-cab{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.tj-cab .der{margin-left:auto}
+.tj-lab{font:600 12px/1 var(--f); letter-spacing:.1em; text-transform:uppercase; color:var(--tx2)}
+.tj-num{display:flex; align-items:baseline; gap:7px; margin-top:12px}
+.tj-num b{font:700 30px/1 var(--f); letter-spacing:-.025em; font-variant-numeric:tabular-nums}
+.tj-num span{font-size:13.5px; color:var(--mu)}
+.pozo{background:var(--pozo); border:1px solid var(--line); border-radius:var(--r-p); padding:14px}
+.tj-pie{display:flex; justify-content:space-between; gap:10px; font:400 11px/1.35 var(--m); color:var(--mu);
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--line)}
+.tj-pie b{color:var(--tx); font-weight:500}
+
+/* ─── chips y píldoras ─── */
+.chip{display:inline-flex; align-items:center; gap:6px; font:500 11px/1 var(--m); padding:5px 9px;
+  border:1px solid var(--line2); border-radius:var(--r-pill); color:var(--tx2); white-space:nowrap}
+@media(max-width:420px){.chip{white-space:normal; line-height:1.35; max-width:100%}}   /* 320 px: desbordaba */
+.chip.ok{border-color:rgba(52,211,153,.4); color:var(--ok); background:var(--ok-w)}
+.chip.bad{border-color:rgba(240,117,101,.45); color:#ffb3a7}
+.chip.blanco{background:var(--blanco); border-color:var(--blanco); color:var(--negro)}
+.pildora{display:inline-flex; align-items:center; gap:10px; padding:8px 15px 8px 12px; border:1px solid var(--line2);
+  border-radius:var(--r-pill); background:var(--c1); color:var(--tx2); font-size:14.5px; font-weight:500}
+.pildora i{width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 4px var(--ok-w); flex:none}
+
+/* ─── botones: la píldora BLANCA manda ─── */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 18px;
+  border-radius:var(--r-pill); border:1px solid var(--line2); background:var(--c2); color:var(--tx);
+  font:600 14.5px/1.15 var(--f); cursor:pointer; white-space:nowrap; text-align:center;
+  transition:transform .15s var(--ease), background .25s var(--ease), border-color .25s var(--ease)}
+.btn:hover{background:var(--c3)}
+.btn:active{transform:scale(.97)}
+.btn.blanco{background:var(--blanco); border-color:var(--blanco); color:var(--negro)}
+.btn.blanco:hover{background:#fff}
+.btn.fant{background:transparent; border-color:var(--line3)}
+.btn[disabled]{opacity:.38; cursor:default; transform:none}
+
+/* ─── el selector en píldora: la píldora blanca se desliza (--i = opción, --n = cuántas) ─── */
+.seg{display:grid; grid-auto-flow:column; grid-auto-columns:1fr; background:var(--pozo); border:1px solid var(--line);
+  border-radius:var(--r-pill); padding:4px; position:relative; --i:0; --n:3}
+.seg .pastilla{position:absolute; top:4px; bottom:4px; left:calc(4px + var(--i) * (100% - 8px) / var(--n));
+  width:calc((100% - 8px) / var(--n)); border-radius:var(--r-pill); background:var(--blanco); transition:left .45s var(--ease)}
+.seg button{appearance:none; border:0; background:transparent; color:var(--mu); font:500 14px/1.1 var(--f);
+  padding:10px 12px; border-radius:var(--r-pill); position:relative; z-index:1; transition:color .3s}
+.seg button[aria-pressed="true"]{color:var(--negro)}
+
+/* ─── la casilla (Bencho): redondeada, el tilde se DIBUJA al marcar ─── */
+.tick{appearance:none; width:44px; height:44px; border-radius:14px; border:1.5px solid var(--line2); background:transparent;
+  display:grid; place-items:center; color:var(--negro); transition:background .25s var(--ease), border-color .25s}
+.tick svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.8; stroke-linecap:round;
+  stroke-linejoin:round; stroke-dasharray:24; stroke-dashoffset:24; transition:stroke-dashoffset .35s var(--ease) .06s}
+.tick[aria-pressed="true"]{background:var(--ok); border-color:var(--ok)}
+.tick[aria-pressed="true"] svg{stroke-dashoffset:0}
+
+/* ─── números y barras (Amicro) ─── */
+.kpi{background:var(--pozo); border:1px solid var(--line); border-radius:14px; padding:12px}
+.kpi b{display:block; font:700 22px/1 var(--f); letter-spacing:-.02em; color:var(--ok)}
+.kpi span{display:block; font:400 11px/1.3 var(--m); color:var(--mu); margin-top:6px}
+.barra{height:8px; border-radius:var(--r-pill); background:var(--pozo); border:1px solid var(--line); overflow:hidden}
+.barra i{display:block; height:100%; border-radius:var(--r-pill); background:var(--blanco); transition:width .8s var(--ease)}
+.barra.ok i{background:var(--ok)}
+/* mapa de calor tipo GitHub: width explícito o el casillero con aspect-ratio mide cero */
+.heat{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,1fr); gap:4px}
+.heat i{width:100%; aspect-ratio:1; border-radius:4px; background:#2a2a2f}
+.heat i.n1{background:var(--ok-4)} .heat i.n2{background:var(--ok-3)} .heat i.n3{background:var(--ok)}
+.heat i.fut{background:transparent; box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ─── navegación: píldora flotante abajo en el celu, menú al costado desde 900 px ─── */
+.nav-abajo{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  z-index:30; display:grid; grid-auto-flow:column; gap:4px; padding:6px; width:min(440px,calc(100vw - 24px));
+  background:rgba(22,22,24,.86); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  border:1px solid var(--line2); border-radius:var(--r-pill); box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.nav-abajo a,.nav-abajo button{display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px;
+  border-radius:var(--r-pill); color:var(--mu); font:500 11px/1 var(--f); background:none; border:0; text-decoration:none}
+.nav-abajo [aria-current="page"]{background:var(--blanco); color:var(--negro)}
+@media(min-width:900px){.nav-abajo{display:none}}
+
+/* ─── movimiento: entra con la curva, escalonado; se apaga con reduced-motion ─── */
+.entra>*{animation:subir .6s var(--ease) both}
+.entra>*:nth-child(2){animation-delay:.05s}.entra>*:nth-child(3){animation-delay:.1s}.entra>*:nth-child(4){animation-delay:.15s}
+@keyframes subir{from{opacity:0; transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important; animation:none!important}}

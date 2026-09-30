@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0e10">
+<title>Tu hoja de ruta</title>
+<meta name="description" content="Pegá un canal de YouTube, contá qué querés lograr y te arma la hoja de ruta con sus videos. Decide Laya en tu compu o JEV con tu clave.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230e0e10'/%3E%3Cpath d='M16 44 C24 44 24 20 32 20 S40 44 48 44' fill='none' stroke='%23f4f4f5' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='44' r='5' fill='%2334d399'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="base.css">
+<style id="estilo-pagina">
+.pagina{max-width:920px; margin:0 auto; padding:52px 20px 88px}
+.cab{display:grid; gap:16px}
+.cab .titulo .gris{display:block}
+.lead{max-width:62ch; margin:0; color:var(--tx2); font-size:17.5px; line-height:1.6}
+.aviso{margin:0; color:#ffb3a7; font:400 13px/1.5 var(--m)}
+
+/* el formulario */
+.form{margin-top:30px; display:grid; gap:24px; padding:22px}
+.campo{display:grid; gap:10px; min-width:0}
+.campo[hidden]{display:none}
+.entrada{width:100%; min-height:50px; padding:13px 15px; background:var(--pozo); color:var(--tx);
+  border:1px solid var(--line); border-radius:var(--r-p); font:400 16px/1.45 var(--f);
+  transition:border-color .25s var(--ease)}
+.entrada:hover{border-color:var(--line2)}
+.entrada:focus{outline:none; border-color:var(--line3)}
+.entrada:focus-visible{outline:2px solid var(--tx); outline-offset:2px}
+.entrada::placeholder{color:var(--mu)}
+textarea.entrada{resize:vertical; min-height:96px}
+.nota{margin:0; font:400 12.5px/1.5 var(--m); color:var(--mu)}
+.nota b{color:var(--tx2); font-weight:500}
+.seg button{min-height:44px; cursor:pointer}
+.seg button[aria-disabled="true"]{opacity:.4; cursor:not-allowed}
+.acciones{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+a.btn{text-decoration:none}
+@media(max-width:700px){
+  .seg.apila{grid-auto-flow:row; grid-auto-rows:1fr; grid-auto-columns:auto; border-radius:22px}
+  .seg.apila .pastilla{left:4px; width:calc(100% - 8px); top:calc(4px + var(--i) * (100% - 8px) / var(--n));
+    height:calc((100% - 8px) / var(--n)); bottom:auto; border-radius:18px; transition:top .45s var(--ease)}
+}
+
+/* el progreso en vivo */
+.progreso{margin-top:16px; padding:22px}
+.progreso[hidden],.resultado[hidden]{display:none}
+.cuenta{display:flex; align-items:baseline; gap:10px; margin-top:14px; flex-wrap:wrap}
+.cuenta b{font:700 clamp(46px,8vw,72px)/1 var(--f); letter-spacing:-.05em; font-variant-numeric:tabular-nums}
+.cuenta span{font-size:20px; color:var(--mu)}
+.progreso .barra{margin-top:16px}
+.mapa-pozo{margin-top:16px}
+.mapa{display:grid; grid-template-columns:repeat(auto-fill,minmax(11px,1fr)); gap:3px}
+.mapa i{width:100%; aspect-ratio:1; border-radius:3px; box-shadow:inset 0 0 0 1px var(--line2);
+  transition:background .35s var(--ease), box-shadow .35s var(--ease)}
+.mapa i.p0{background:#2a2a2f; box-shadow:none}
+.mapa i.p1{background:var(--ok-4); box-shadow:none}
+.mapa i.p2{background:var(--ok-3); box-shadow:none}
+.mapa i.p3{background:var(--ok); box-shadow:none}
+.mapa i.elegido{box-shadow:0 0 0 2px var(--blanco)}
+.mapa-ley{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font:400 11.5px/1 var(--m); color:var(--mu)}
+.mapa-ley span{display:inline-flex; align-items:center; gap:6px}
+.mapa-ley i{width:11px; height:11px; border-radius:3px; display:inline-block}
+.vivo{list-style:none; margin:16px 0 0; padding:0; display:grid; gap:2px; min-height:238px}
+.vivo li{display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:14px; align-items:center; padding:7px 2px;
+  border-bottom:1px solid var(--line); font-size:14.5px; color:var(--tx2); animation:fila .22s var(--ease) both}
+/* solo se desliza, sin fundido: llegan de a seis cada 150 ms y con fundido la lista entera quedaba a media luz */
+@keyframes fila{from{transform:translateY(-6px)}}
+.vivo li:last-child{border-bottom:0}
+.vivo .t{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.vivo .p{font:500 13px/1 var(--m); color:var(--tx); min-width:4.2ch; text-align:right}
+.vivo .p.si{color:var(--ok)}
+.vivo .ms{font:400 11.5px/1 var(--m); color:var(--mu); min-width:7ch; text-align:right}
+@media(max-width:520px){.vivo li{grid-template-columns:minmax(0,1fr) auto} .vivo .ms{display:none}}
+
+/* el resultado */
+.resultado{margin-top:16px; display:grid; gap:16px}
+.res-cab{padding:22px; display:grid; gap:16px}
+.res-tit{font:700 clamp(28px,4vw,40px)/1.08 var(--f); letter-spacing:-.03em}
+.res-tit .gris{display:block; font-weight:600}
+.res-meta{margin:0; font:400 12.5px/1.6 var(--m); color:var(--mu)}
+.res-meta b{color:var(--tx); font-weight:500}
+.avance{display:grid; gap:8px}
+.avance span{font:400 12px/1 var(--m); color:var(--mu)}
+.etapa{padding:20px}
+.videos{display:grid; gap:10px; margin-top:16px}
+.video{display:grid; grid-template-columns:168px minmax(0,1fr) 44px; gap:16px; align-items:center;
+  background:var(--pozo); border:1px solid var(--line); border-radius:var(--r-p); padding:10px 12px 10px 10px;
+  transition:border-color .25s var(--ease)}
+.video:hover{border-color:var(--line2)}
+.mini{position:relative; display:block; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:var(--c2)}
+.mini img{display:block; width:100%; height:100%; object-fit:cover}
+.dur{position:absolute; right:6px; bottom:6px; padding:3px 5px; border-radius:6px; background:rgba(0,0,0,.8);
+  color:#fff; font:500 11px/1 var(--m)}
+.video-tit{color:var(--tx); text-decoration:none; font:600 16px/1.35 var(--f); overflow-wrap:break-word}
+.video-tit:hover{text-decoration:underline; text-underline-offset:3px}
+.video-pie{display:flex; flex-wrap:wrap; gap:8px; margin-top:9px}
+.video.visto .video-tit{color:var(--mu)}
+.video.visto .mini img{opacity:.55}
+@media(max-width:600px){
+  .video{grid-template-columns:112px minmax(0,1fr) 44px; gap:12px; padding:8px}
+  .video-tit{font-size:14.5px}
+}
+@media(max-width:380px){
+  .video{grid-template-columns:minmax(0,1fr) 44px}
+  .video .mini{grid-column:1 / -1}
+}
+.pie{margin-top:40px; padding-top:16px; border-top:1px solid var(--line); font:400 12px/1.6 var(--m); color:var(--mu)}
+</style>
+</head>
+<body>
+<main class="pagina">
+  <header class="cab entra">
+    <p class="eyebrow">hoja de ruta · código abierto</p>
+    <h1 class="titulo">Tu <span class="clave">hoja de ruta</span><span class="gris">con los videos de cualquier canal.</span></h1>
+    <p class="lead">Pegá un canal de YouTube, contá qué querés lograr y elegí quién decide. Lee todos los títulos, se queda con los que te sirven y te los ordena en etapas. No escribe nada: decide sobre los videos que existen.</p>
+  </header>
+
+  <section class="tj form" id="form" aria-label="Armar la hoja de ruta">
+    <label class="campo">
+      <span class="tj-lab">El canal</span>
+      <input class="entrada" id="canal" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+             value="https://www.youtube.com/@facundocorengia">
+      <span class="nota" id="canal-nota" aria-live="polite">&nbsp;</span>
+    </label>
+
+    <label class="campo">
+      <span class="tj-lab">¿Qué querés lograr?</span>
+      <textarea class="entrada" id="objetivo" rows="3" maxlength="400"
+                placeholder="Por ejemplo: quiero conseguir mi primer cliente con agentes de IA"></textarea>
+    </label>
+
+    <div class="campo">
+      <span class="tj-lab" id="lab-perfil">¿Quién sos?</span>
+      <div class="seg apila" id="perfil" role="group" aria-labelledby="lab-perfil" style="--i:0;--n:3">
+        <i class="pastilla"></i>
+        <button type="button" data-v="aprender" aria-pressed="true">Quiero aprender</button>
+        <button type="button" data-v="empresa" aria-pressed="false">Tengo una empresa</button>
+        <button type="button" data-v="agencia" aria-pressed="false">Quiero ofrecerlo como servicio</button>
+      </div>
+    </div>
+
+    <div class="campo">
+      <span class="tj-lab" id="lab-motor">¿Quién decide?</span>
+      <div class="seg apila" id="motor" role="group" aria-labelledby="lab-motor" style="--i:0;--n:2">
+        <i class="pastilla"></i>
+        <button type="button" data-v="jev" aria-pressed="true">JEV · con tu clave de OpenRouter</button>
+        <button type="button" data-v="laya" aria-pressed="false">Laya · en tu compu, gratis</button>
+      </div>
+      <p class="nota" id="motor-nota">&nbsp;</p>
+    </div>
+
+    <label class="campo" id="clave-campo">
+      <span class="tj-lab">Tu clave de OpenRouter</span>
+      <input class="entrada" id="clave" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-…">
+      <span class="nota">Se usa solo para esta ruta: no se guarda en ningún lado.</span>
+    </label>
+
+    <div class="acciones">
+      <button class="btn blanco" id="armar" type="button">Armar mi hoja de ruta</button>
+      <p class="aviso" id="form-aviso" role="alert"></p>
+    </div>
+  </section>
+
+  <section class="tj progreso" id="progreso" hidden aria-label="Progreso">
+    <div class="tj-cab"><span class="tj-lab" id="fase" aria-live="polite">Leyendo el canal</span><span class="chip der mono" id="reloj">0,0 s</span></div>
+    <div class="cuenta"><b id="hechas">0</b><span id="de">decisiones</span></div>
+    <div class="barra"><i id="barra" style="width:0%"></i></div>
+    <div class="pozo mapa-pozo">
+      <div class="mapa" id="mapa" aria-hidden="true"></div>
+      <div class="mapa-ley"><span><i style="background:var(--ok)"></i>le sirve</span><span><i style="background:var(--ok-3)"></i>puede ser</span><span><i style="background:#2a2a2f"></i>no le sirve</span><span><i style="box-shadow:0 0 0 2px var(--blanco)"></i>entra en tu ruta</span></div>
+    </div>
+    <ol class="vivo" id="vivo" aria-hidden="true"></ol>
+  </section>
+
+  <section class="resultado" id="resultado" hidden aria-label="Tu hoja de ruta">
+    <div class="tj res-cab">
+      <p class="rotulo"><b>lista</b> Tu hoja de ruta</p>
+      <h2 class="res-tit" id="res-tit"></h2>
+      <p class="res-meta" id="res-meta"></p>
+      <p class="aviso" id="res-poco" hidden>Pocos videos de este canal hablan de eso: te dejo los que más se acercan.</p>
+      <div class="acciones">
+        <a class="btn blanco" id="playlist" href="#" target="_blank" rel="noopener">Verla como playlist</a>
+        <button class="btn fant" id="descargar" type="button">Descargar</button>
+        <button class="btn fant" id="otra" type="button">Armar otra</button>
+      </div>
+      <div class="avance"><span id="vistos">0 vistos</span><div class="barra ok"><i id="vistos-barra" style="width:0%"></i></div></div>
+    </div>
+    <div id="etapas" style="display:grid; gap:16px"></div>
+  </section>
+
+  <p class="pie">Código abierto. Decide Laya, en tu compu, o JEV, por OpenRouter: ninguno escribe, los dos eligen entre los videos que el canal ya tiene.</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const CLAVE_VISTOS = "hoja-de-ruta:vistos";
+  const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let motores = null, ruta = null, corriendo = false;
+
+  // ── utilidades ──
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+  const num = (x, d) => Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d});
+  const entero = (x) => Number(x).toLocaleString("es-AR");
+  function duracion(s) {
+    s = Math.round(s || 0); if (!s) return "";
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = String(s % 60).padStart(2, "0");
+    return h ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+  }
+  function costo(r) {
+    if (r.motor !== "JEV") return "gratis";
+    const c = r.costo || 0;
+    return "USD " + (c < 0.01 ? num(c, 4) : num(c, 3));
+  }
+  async function api(ruta_, opciones) {
+    const r = await fetch(ruta_, opciones);
+    let d = {};
+    try { d = await r.json(); } catch (e) { /* sin cuerpo */ }
+    if (!r.ok) throw new Error(d.error || `Algo falló (${r.status}).`);
+    return d;
+  }
+  function leerVistos() { try { return new Set(JSON.parse(localStorage.getItem(CLAVE_VISTOS) || "[]")); } catch (e) { return new Set(); } }
+  function guardarVistos(set) { try { localStorage.setItem(CLAVE_VISTOS, JSON.stringify([...set])); } catch (e) { /* sin almacenamiento: sigue andando */ } }
+  const scrollA = (el) => el.scrollIntoView({behavior: reducido ? "auto" : "smooth", block: "start"});
+
+  // ── los selectores en píldora ──
+  function valorSeg(seg) { return seg.querySelector('button[aria-pressed="true"]').dataset.v; }
+  function ponerSeg(seg, v) {
+    const bs = [...seg.querySelectorAll("button")];
+    bs.forEach((b, i) => { const on = b.dataset.v === v; b.setAttribute("aria-pressed", on); if (on) seg.style.setProperty("--i", i); });
+  }
+  document.querySelectorAll(".seg").forEach((seg) => seg.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || b.getAttribute("aria-disabled") === "true" || corriendo) return;
+    ponerSeg(seg, b.dataset.v);
+    if (seg.id === "motor") notaMotor();
+  }));
+
+  // ── el motor: qué hay en esta compu ──
+  function notaMotor() {
+    const v = valorSeg($("#motor")), nota = $("#motor-nota"), l = motores && motores.laya;
+    $("#clave-campo").hidden = v !== "jev";
+    if (v === "jev") {
+      nota.innerHTML = "Decide en OpenRouter: un sí o no por video, a centavos de centavo. Va de a doce a la vez.";
+      $("#clave").placeholder = motores && motores.jev.clave_guardada ? "Ya hay una: podés dejarlo vacío" : "sk-or-…";
+      return;
+    }
+    if (!l) { nota.textContent = " "; return; }
+    if (l.error) nota.innerHTML = "Laya no arrancó en esta compu: <b>" + esc(l.error) + "</b>";
+    else if (l.cargando || !l.cargado) nota.innerHTML = "Cargando Laya en tu placa…";
+    else if (l.gpu) nota.innerHTML = "Corre en tu placa (<b>" + esc(l.placa) + "</b>), gratis y sin que nada salga de tu compu. " +
+      "Ojo: sin entrenar, Laya lee el tema pero no entiende qué querés, y la ruta sale mucho peor. Para esto, hoy conviene JEV.";
+    else nota.innerHTML = "Sin placa NVIDIA, Laya tarda casi un segundo por video. Y sin entrenar, la ruta sale mucho peor: para esto, JEV.";
+  }
+  async function cargarMotores() {
+    try { motores = await api("/api/motores"); } catch (e) { $("#motor-nota").textContent = e.message; return; }
+    const bLaya = $('#motor button[data-v="laya"]');
+    if (!motores.laya.instalado) {
+      bLaya.setAttribute("aria-disabled", "true");
+      bLaya.title = "Laya no está instalado: pip install laya";
+      ponerSeg($("#motor"), "jev");
+    }
+    notaMotor();
+    if (motores.laya.instalado && (motores.laya.cargando || (!motores.laya.cargado && !motores.laya.error))) setTimeout(cargarMotores, 1500);
+  }
+
+  // ── el canal: cuántos videos tiene ──
+  let tCanal = null, canalPedido = "";
+  async function mirarCanal() {
+    const url = $("#canal").value.trim(), nota = $("#canal-nota");
+    if (!url || url === canalPedido) return;
+    canalPedido = url;
+    nota.textContent = "Leyendo el canal…";
+    try {
+      const d = await api("/api/canal?url=" + encodeURIComponent(url));
+      if (canalPedido === url) nota.innerHTML = "<b>" + esc(d.canal) + "</b> · " + entero(d.videos) + " videos";
+    } catch (e) { if (canalPedido === url) { nota.textContent = e.message; canalPedido = ""; } }
+  }
+  $("#canal").addEventListener("input", () => { clearTimeout(tCanal); tCanal = setTimeout(mirarCanal, 700); });
+  $("#canal").addEventListener("change", mirarCanal);
+
+  // ── armar ──
+  const celdas = new Map();
+  let total = 0, pasan = 0, total2 = 0, hechas = 0, nombresEtapas = [], t0 = 0, reloj = null;
+  function aviso(txt) { $("#form-aviso").textContent = txt || ""; }
+  function bloquear(si) {
+    corriendo = si;
+    $("#armar").disabled = si;
+    $("#armar").textContent = si ? "Armando…" : "Armar mi hoja de ruta";
+    ["#canal", "#objetivo", "#clave"].forEach((s) => { $(s).disabled = si; });
+  }
+  async function armar() {
+    if (corriendo) return;
+    aviso("");
+    const objetivo = $("#objetivo").value.trim();
+    if (objetivo.length < 8) { aviso("Contá un poco más qué querés lograr (una frase alcanza)."); $("#objetivo").focus(); return; }
+    const pedido = {canal: $("#canal").value.trim(), objetivo, perfil: valorSeg($("#perfil")),
+                    motor: valorSeg($("#motor")), clave: $("#clave").value.trim()};
+    bloquear(true);
+    try {
+      const {id} = await api("/api/ruta", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(pedido)});
+      prepararProgreso();
+      seguir(id, 0);
+    } catch (e) { aviso(e.message); bloquear(false); }
+  }
+  $("#armar").addEventListener("click", armar);
+  $("#objetivo").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) armar(); });
+
+  function prepararProgreso() {
+    total = pasan = total2 = hechas = 0; nombresEtapas = []; celdas.clear();
+    $("#mapa").innerHTML = ""; $("#vivo").innerHTML = "";
+    $("#hechas").textContent = "0"; $("#de").textContent = "decisiones"; $("#barra").style.width = "0%";
+    $("#fase").textContent = "Leyendo los videos del canal";
+    $("#resultado").hidden = true;
+    $("#progreso").hidden = false;
+    t0 = performance.now();
+    clearInterval(reloj);
+    reloj = setInterval(() => { $("#reloj").textContent = num((performance.now() - t0) / 1000, 1) + " s"; }, 100);
+    scrollA($("#progreso"));
+  }
+  function contar() {
+    const tot = total + total2;
+    $("#hechas").textContent = entero(hechas);
+    $("#de").textContent = tot ? "de " + entero(tot) + " decisiones" : "decisiones";
+    const fr = total2 ? 0.85 + 0.15 * Math.max(0, hechas - total) / total2 : 0.85 * hechas / Math.max(1, total);
+    $("#barra").style.width = Math.min(100, fr * 100).toFixed(1) + "%";
+  }
+  function alVivo(titulo, derecha, clase, ms) {
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="t">' + esc(titulo) + '</span><span class="p ' + (clase || "") + '">' + esc(derecha) +
+                   '</span><span class="ms">' + (ms != null ? num(ms, 0) + " ms" : "") + "</span>";
+    const vivo = $("#vivo");
+    vivo.insertBefore(li, vivo.firstChild);
+    while (vivo.children.length > 7) vivo.lastChild.remove();
+  }
+  function procesar(ev) {
+    if (ev.tipo === "fase") $("#fase").textContent = ev.texto;
+    else if (ev.tipo === "canal") {
+      total = ev.total; nombresEtapas = ev.etapas || [];
+      const frag = document.createDocumentFragment();
+      ev.ids.forEach((id) => { const i = document.createElement("i"); celdas.set(id, i); frag.appendChild(i); });
+      $("#mapa").appendChild(frag);
+      contar();
+    } else if (ev.tipo === "sirve") {
+      hechas = ev.hechas;
+      const c = celdas.get(ev.id);
+      if (c) c.className = ev.p >= 0.8 ? "p3" : ev.p >= 0.6 ? "p2" : ev.p >= 0.4 ? "p1" : "p0";
+      alVivo(ev.titulo, num(ev.p, 2), ev.p >= 0.6 ? "si" : "", ev.ms);
+      contar();
+    } else if (ev.tipo === "pasan") {
+      pasan = ev.ids.length;
+      ev.ids.forEach((id) => { const c = celdas.get(id); if (c) c.classList.add("elegido"); });
+      $("#fase").textContent = "Ubicando " + pasan + " videos en el camino";
+      contar();
+    } else if (ev.tipo === "etapas") {
+      total2 = ev.decisiones; contar();
+    } else if (ev.tipo === "etapa") {
+      hechas = ev.hechas;
+      alVivo(ev.titulo, "→ " + (nombresEtapas[ev.etapa] || "etapa " + (ev.etapa + 1)), "si", null);
+      contar();
+    }
+  }
+  async function seguir(id, desde) {
+    let d;
+    try { d = await api("/api/progreso/" + id + "?desde=" + desde); }
+    catch (e) { terminar(); aviso(e.message); return; }
+    d.eventos.forEach(procesar);
+    if (d.estado === "listo") { terminar(); mostrar(d.resultado); return; }
+    if (d.estado === "error") { terminar(); $("#fase").textContent = "No se pudo"; aviso(d.error); return; }
+    setTimeout(() => seguir(id, d.n), 150);
+  }
+  function terminar() { clearInterval(reloj); bloquear(false); }
+
+  // ── el resultado ──
+  function tarjetaVideo(v, vistos) {
+    const url = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id), visto = vistos.has(v.id);
+    return '<div class="video' + (visto ? " visto" : "") + '" data-id="' + esc(v.id) + '">' +
+      '<a class="mini" href="' + url + '" target="_blank" rel="noopener" tabindex="-1"><img loading="lazy" alt="" src="https://i.ytimg.com/vi/' + esc(v.id) + '/mqdefault.jpg">' +
+      (v.segundos ? '<span class="dur">' + duracion(v.segundos) + "</span>" : "") + "</a>" +
+      '<div><a class="video-tit" href="' + url + '" target="_blank" rel="noopener">' + esc(v.titulo) + "</a>" +
+      '<div class="video-pie"><span class="chip ok">sirve ' + num(v.sirve, 2) + "</span></div></div>" +
+      '<button class="tick" type="button" aria-pressed="' + visto + '" aria-label="Marcar como visto: ' + esc(v.titulo) + '">' + TICK + "</button></div>";
+  }
+  function etapasHTML(r, vistos) {
+    return r.etapas.map((e, i) => '<article class="tj etapa"><p class="rotulo"><b>' + String(i + 1).padStart(2, "0") + "</b> " +
+      esc(e.nombre) + '</p><div class="videos">' + e.videos.map((v) => tarjetaVideo(v, vistos)).join("") + "</div></article>").join("");
+  }
+  function cuentaVideos(r) { return r.etapas.reduce((a, e) => a + e.videos.length, 0); }
+  function metaHTML(r) {
+    return "<b>" + esc(r.canal) + "</b> · " + entero(r.videos_del_canal) + " videos leídos · " + entero(r.decisiones) +
+      " decisiones · " + num(r.segundos_decidir, 1) + " s · " + costo(r) + " · decidió <b>" + esc(r.motor) + "</b>" +
+      (r.placa && r.motor === "Laya" ? " en " + esc(r.placa) : "");
+  }
+  let ultimo = null;
+  function mostrar(r) {
+    ultimo = r;
+    const n = cuentaVideos(r);
+    $("#fase").textContent = "Listo";
+    $("#reloj").textContent = num(r.segundos, 1) + " s";
+    $("#barra").style.width = "100%";
+    $("#res-tit").innerHTML = n + " videos en " + r.etapas.length + (r.etapas.length === 1 ? " etapa" : " etapas") +
+      '<span class="gris">para «' + esc(r.objetivo) + "»</span>";
+    $("#res-meta").innerHTML = metaHTML(r);
+    $("#res-poco").hidden = !r.poco;
+    const pl = $("#playlist");
+    pl.href = r.playlist || "#"; pl.hidden = !r.playlist;
+    $("#etapas").innerHTML = etapasHTML(r, leerVistos());
+    avance();
+    $("#resultado").hidden = false;
+    scrollA($("#resultado"));
+  }
+  function avance() {
+    const tarjetas = [...document.querySelectorAll("#etapas .video")], vistos = tarjetas.filter((t) => t.classList.contains("visto")).length;
+    $("#vistos").textContent = vistos + " de " + tarjetas.length + " vistos";
+    $("#vistos-barra").style.width = (tarjetas.length ? 100 * vistos / tarjetas.length : 0) + "%";
+  }
+  $("#etapas").addEventListener("click", (e) => {
+    const b = e.target.closest(".tick"); if (!b) return;
+    const tarjeta = b.closest(".video"), id = tarjeta.dataset.id, vistos = leerVistos();
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", on); tarjeta.classList.toggle("visto", on);
+    on ? vistos.add(id) : vistos.delete(id);
+    guardarVistos(vistos); avance();
+  });
+  $("#otra").addEventListener("click", () => { scrollA($("#form")); setTimeout(() => $("#objetivo").focus({preventScroll: true}), 400); });
+
+  // ── descargar: un HTML suelto, con la letra adentro, que anda sin este programa ──
+  async function aDataURL(url, tipo) {
+    const b = await (await fetch(url)).blob();
+    return await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result.replace(/^data:[^;]*/, "data:" + tipo)); fr.readAsDataURL(b); });
+  }
+  async function descargar() {
+    if (!ultimo) return;
+    const r = ultimo, boton = $("#descargar");
+    boton.disabled = true;
+    try {
+      let css = await (await fetch("base.css")).text();
+      for (const f of ["outfit-300-800.woff2", "jetbrains-mono-400-600.woff2"]) css = css.replace("url(fuentes/" + f + ")", "url(" + await aDataURL("fuentes/" + f, "font/woff2") + ")");
+      css += "\n" + $("#estilo-pagina").textContent;
+      const n = cuentaVideos(r);
+      const html = '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+        '<meta name="theme-color" content="#0e0e10"><title>Hoja de ruta · ' + esc(r.canal) + "</title><style>" + css + "</style></head><body>" +
+        '<main class="pagina"><header class="cab"><p class="eyebrow">hoja de ruta · ' + esc(r.canal) + "</p>" +
+        '<h1 class="titulo">Tu <span class="clave">hoja de ruta</span><span class="gris">para «' + esc(r.objetivo) + "».</span></h1></header>" +
+        '<section class="resultado"><div class="tj res-cab"><h2 class="res-tit">' + n + " videos en " + r.etapas.length + " etapas</h2>" +
+        '<p class="res-meta">' + metaHTML(r) + "</p>" +
+        (r.poco ? '<p class="aviso">Pocos videos de este canal hablan de eso: te dejo los que más se acercan.</p>' : "") +
+        (r.playlist ? '<div class="acciones"><a class="btn blanco" href="' + esc(r.playlist) + '" target="_blank" rel="noopener">Verla como playlist</a></div>' : "") +
+        '<div class="avance"><span id="vistos"></span><div class="barra ok"><i id="vistos-barra" style="width:0%"></i></div></div></div>' +
+        '<div id="etapas" style="display:grid; gap:16px">' + etapasHTML(r, new Set()) + "</div></section></main>" +
+        "<script>(function(){var K=" + JSON.stringify(CLAVE_VISTOS) + ",E=document.getElementById('etapas');function L(){try{return new Set(JSON.parse(localStorage.getItem(K)||'[]'))}catch(e){return new Set()}}" +
+        "function A(){var t=[].slice.call(E.querySelectorAll('.video')),v=t.filter(function(x){return x.classList.contains('visto')}).length;document.getElementById('vistos').textContent=v+' de '+t.length+' vistos';document.getElementById('vistos-barra').style.width=(t.length?100*v/t.length:0)+'%'}" +
+        "var s=L();[].forEach.call(E.querySelectorAll('.video'),function(t){if(s.has(t.dataset.id)){t.classList.add('visto');t.querySelector('.tick').setAttribute('aria-pressed','true')}});A();" +
+        "E.addEventListener('click',function(e){var b=e.target.closest('.tick');if(!b)return;var t=b.closest('.video'),s=L(),on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);t.classList.toggle('visto',on);on?s.add(t.dataset.id):s.delete(t.dataset.id);try{localStorage.setItem(K,JSON.stringify(Array.from(s)))}catch(e){}A()})})();<\/script></body></html>";
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([html], {type: "text/html"}));
+      a.download = "hoja-de-ruta-" + (r.canal || "canal").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".html";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    } finally { boton.disabled = false; }
+  }
+  $("#descargar").addEventListener("click", descargar);
+
+  cargarMotores();
+  mirarCanal();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# la clave de OpenRouter: nunca al repositorio
+.env
+# los videos de cada canal que se guardan un día
+canales/
+__pycache__/
+*.log
+venv/
+.venv/
